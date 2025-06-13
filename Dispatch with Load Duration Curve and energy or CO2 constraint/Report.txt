@@ -1,0 +1,55 @@
+!declarations
+!  PU: string;
+! CU: string;   CperEU: string
+!end-declarations
+!PU := 'MW'; 
+!CU := '$/h'; CperEU :=  '$/MWh'
+
+
+fopen("B5.txt",F_OUTPUT)    ! Uncomment to send output to file
+                                   ! Do same for fclose at end of file   
+
+writeln; writeln('Load marginal prices(sT) =  !  ', CperEU)
+forall(t in sT) do
+  write(strfmt(t,4), '   ')
+  writeln(strfmt(getdual(Bal(t))/H(t),10,4))
+end-do
+
+
+writeln; writeln('Capacity value(sG) = !  ', CperEU)
+write('     '); forall(g in sG)  write(strfmt(g,5), '     '); writeln
+forall(g in sG)  write(strfmt(sum(t in sT) -getdual(GCap(g,t))/Htot,10,4))
+writeln
+
+writeln;  writeln('pG(sT,sG)=   !   ', PU)
+write('    ')
+forall(g in sG) write('       ',strfmt(g,5))
+writeln
+forall(t in sT) do
+  write(strfmt(t,5), '   ')
+  forall(g in sG) write(strfmt(getsol(pG(g,t)),10,4), '  ')
+  writeln
+end-do
+write(strfmt('Aver',5),'   ');
+forall(g in sG) write(strfmt(sum(t in sT) H(t)*getsol(pG(g,t)/Htot),10,4), '  ')
+writeln
+
+writeln
+!writeln('cost = ', strfmt(getobjval/10^3,6,3),' £m/hr')
+writeln('cost = ', strfmt(getobjval,6,3),' ', CU)
+writeln
+
+! (c) Shadow Price of CO2 Constraint
+dual_CO2 := getdual(CO2_Limit)
+writeln("Shadow Price of CO2 Constraint: ", dual_CO2, " £/tonne")
+
+
+! (e) Shadow Price of Generator Capacity Constraints
+forall(g in sG, t in sT) do
+  dual_Cap(g,t) := getdual(GCap(g,t))
+  writeln("Shadow Price of Capacity Limit (Gen ", g, ", Period ", t, "): ", dual_Cap(g,t), " £/MW")
+end-do
+
+include 'CheckSol.txt'
+
+!fclose(F_OUTPUT)     ! uncomment to send output to file

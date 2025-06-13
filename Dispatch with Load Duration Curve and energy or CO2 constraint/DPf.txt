@@ -1,0 +1,35 @@
+
+cost = 1002000.000 £/h
+
+
+pG(sT,sG)=   !   MW
+              G1          G2          G3          G4
+ Peak    1000.0000  10000.0000  20000.0000  17000.0000  
+ Mid1       0.0000      0.0000  15000.0000  17000.0000  
+ Mid2       0.0000      0.0000   5000.0000  17000.0000  
+  Low       0.0000      0.0000      0.0000  15000.0000  
+
+Load marginal prices(sT) =  !  £/MWh
+Peak      11.0000
+Mid1      14.0000
+Mid2      14.0000
+ Low       7.0000
+Minimum Average Hourly CO2 Output: 73428.73442 tonnes/h
+Shadow Price of CO2 Constraint: 0 £/tonne
+Shadow Price of Capacity Limit (Gen G1, Period Peak): 0 £/MW
+Shadow Price of Capacity Limit (Gen G1, Period Mid1): 0 £/MW
+Shadow Price of Capacity Limit (Gen G1, Period Mid2): 0 £/MW
+Shadow Price of Capacity Limit (Gen G1, Period Low): 0 £/MW
+Shadow Price of Capacity Limit (Gen G2, Period Peak): -6 £/MW
+Shadow Price of Capacity Limit (Gen G2, Period Mid1): 0 £/MW
+Shadow Price of Capacity Limit (Gen G2, Period Mid2): 0 £/MW
+Shadow Price of Capacity Limit (Gen G2, Period Low): 0 £/MW
+Shadow Price of Capacity Limit (Gen G3, Period Peak): -7 £/MW
+Shadow Price of Capacity Limit (Gen G3, Period Mid1): 0 £/MW
+Shadow Price of Capacity Limit (Gen G3, Period Mid2): 0 £/MW
+Shadow Price of Capacity Limit (Gen G3, Period Low): 0 £/MW
+Shadow Price of Capacity Limit (Gen G4, Period Peak): -7.5 £/MW
+Shadow Price of Capacity Limit (Gen G4, Period Mid1): -1.75 £/MW
+Shadow Price of Capacity Limit (Gen G4, Period Mid2): -1.75 £/MW
+Shadow Price of Capacity Limit (Gen G4, Period Low): 0 £/MW
+Problem status: Optimum found

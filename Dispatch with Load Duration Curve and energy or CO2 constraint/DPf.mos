@@ -1,0 +1,115 @@
+model Dispatch_problem_formulation
+uses "mmxprs"
+
+declarations
+  ! Reporting parameters
+  PU: string; CU: string; CperEU: string
+
+  ! Sets
+  sT: set of string         ! Set of periods
+  sG: set of string         ! Set of generators
+
+  ! Parameters
+  H: array(sT) of real      ! Duration of period [h]
+  Htot: real                ! Total duration of periods [h]
+  PD: array(sT) of real     ! Load in period  [GW]
+  PG_UB: array(sG) of real  ! Max output of generator [GW]
+  CG: array(sG) of real     ! Cost of running generator [£/MWh]
+  WF: array(sG) of real     ! CO2 emissions per MWh [tonne-CO2/MWh]
+  EG: array(sG) of real     ! Efficiency of generator
+  W_Max: real             ! maximum CO2 consumption
+  ! Decision Variables
+  pG: array(sG,sT) of mpvar ! Power output of generator in period [MW]
+  
+  
+  !NOTE THAT ALL PARAMETERS HAVE BEEN CONVERTED FROM GW TO MW OR GWH TO KWH
+  ! Shadow Prices (Dual Variables)
+  dual_CO2: real
+  dual_Bal: array(sT) of real
+  dual_Cap: array(sG,sT) of real
+end-declarations
+
+! Load data
+initializations from "DPf.dat"
+    PU CU CperEU
+    H PD
+    sG sT PG_UB CG WF EG
+end-initializations
+
+Htot := sum(t in sT) H(t)
+
+! --------------------------------------
+
+! Power Balance Constraint
+forall(t in sT) do
+  Bal(t) := sum(g in sG) pG(g,t)  = PD(t)
+end-do
+
+! CO2 Consumption Constraint
+CO2_Limit := sum(g in sG, t in sT) (pG(g,t) / EG(g)) * WF(g) * Htot  <= W_Max !W_Max not yet given
+
+! Generator Capacity Constraints
+forall(g in sG, t in sT) do
+  GCap(g,t) := pG(g,t) <= PG_UB(g)
+end-do
+
+! Objective Function: Minimize Cost
+cost:= sum(t in sT) H(t) * sum(g in sG) CG(g) * pG(g,t) / Htot
+minimize(cost)
+
+! Solve Model
+
+
+! --------------------------------------
+! **Output Reporting**
+
+fopen("DPf.txt",F_OUTPUT)    !send output to file
+                                   
+
+
+writeln
+!Total cost
+writeln('cost = ', strfmt(getobjval,6,3),' ', CU)
+writeln
+!Power generation in each period by the generators
+writeln;  writeln('pG(sT,sG)=   !   ', PU)
+write('    ')
+forall(g in sG) write('       ',strfmt(g,5))
+writeln
+forall(t in sT) do
+  write(strfmt(t,5), '   ')
+  forall(g in sG) write(strfmt(getsol(pG(g,t)),10,4), '  ')
+  writeln
+end-do
+! Marginal Price in Each Period (Dual of Balance Constraint)
+writeln; writeln('Load marginal prices(sT) =  !  ', CperEU)
+forall(t in sT) do
+  write(strfmt(t,4), '   ')
+  writeln(strfmt(getdual(Bal(t)),10,4))
+end-do
+
+! (B4) Minimum Average Hourly CO2 Output
+Min_Avg_CO2 := sum(g in sG, t in sT) (getsol(pG(g,t)) / EG(g)) * WF(g) 
+writeln("Minimum Average Hourly CO2 Output: ", Min_Avg_CO2, " tonnes/h")
+
+! (c) Shadow Price of CO2 Constraint
+dual_CO2 := getdual(CO2_Limit)
+writeln("Shadow Price of CO2 Constraint: ", dual_CO2, " £/tonne")
+
+
+! (e) Shadow Price of Generator Capacity Constraints
+forall(g in sG, t in sT) do
+  dual_Cap(g,t) := getdual(GCap(g,t))
+  writeln("Shadow Price of Capacity Limit (Gen ", g, ", Period ", t, "): ", dual_Cap(g,t), " £/MW")
+
+
+end-do
+
+
+include 'CheckSol.txt'
+
+fclose(F_OUTPUT)     ! send output to file
+
+
+
+end-model

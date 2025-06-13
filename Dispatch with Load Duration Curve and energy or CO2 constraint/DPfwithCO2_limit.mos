@@ -1,0 +1,68 @@
+model Dispatch_problem_formulation
+uses "mmxprs"
+
+declarations
+  ! Reporting parameters
+  PU: string; CU: string; CperEU: string
+
+  ! Sets
+  sT: set of string         ! Set of periods
+  sG: set of string         ! Set of generators
+
+  ! Parameters
+  H: array(sT) of real      ! Duration of period [h]
+  Htot: real                ! Total duration of periods [h]
+  PD: array(sT) of real     ! Load in period  [GW]
+  PG_UB: array(sG) of real  ! Max output of generator [GW]
+  CG: array(sG) of real     ! Cost of running generator [£/MWh]
+  WF: array(sG) of real     ! CO2 emissions per MWh [tonne-CO2/MWh]
+  EG: array(sG) of real     ! Efficiency of generator
+  W_Max: real             ! maximum CO2 consumption
+  ! Decision Variables
+  pG: array(sG,sT) of mpvar ! Power output of generator in period [MW]
+
+
+  !NOTE THAT ALL PARAMETERS HAVE BEEN CONVERTED FROM GW TO MW OR GWH TO KWH
+  ! Shadow Prices (Dual Variables)
+  dual_CO2: real
+  dual_Bal: array(sT) of real
+  dual_Cap: array(sG,sT) of real
+end-declarations
+
+! Load data
+initializations from "B5.dat"
+    PU CU CperEU
+    H PD
+    sG sT PG_UB CG WF EG W_Max
+end-initializations
+
+Htot := sum(t in sT) H(t)
+
+! --------------------------------------
+
+! Power Balance Constraint
+forall(t in sT) do
+  Bal(t) := sum(g in sG) pG(g,t)  = PD(t)
+end-do
+
+! CO2 Consumption Constraint
+CO2 := sum(t in sT,g in sG) (pG(g,t) ) * WF(g) / EG(g)
+
+CO2_Limit := sum(t in sT,g in sG) (pG(g,t) ) * WF(g) / EG(g) <=  W_Max
+
+
+
+! Generator Capacity Constraints
+forall(g in sG, t in sT) do
+  GCap(g,t) := pG(g,t) <= PG_UB(g)
+end-do
+
+! Objective Function: Minimize Cost
+cost:= sum(t in sT) H(t) * sum(g in sG) CG(g) * pG(g,t) / Htot
+minimize(cost)
+
+CO2_emmison:= CO2_Limit/ Htot
+
+
+include 'Report.txt'
+end-model

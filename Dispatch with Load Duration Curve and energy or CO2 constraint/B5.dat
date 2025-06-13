@@ -1,0 +1,17 @@
+
+sT:     [Peak Mid1 Mid2 Low]     !         set of Periods
+H:      [0.1 0.35 0.35 0.20]        ! [h]     hours in period
+PD:     [48000.0 32000.0 22000.0 15000.0]      ! [MW]    load demand
+
+sG:     [G1 G2 G3 G4]      !         set of Generators
+PG_UB:  [29000.0 10000.0 20000.0 17000.0]  ! [MW]    generator maximum power output
+CG:     [110 50 40 35]      ! [£/MWh] generator costs
+
+WF:     [0.24 0.181 0.181 0.318]      ! [tonne-CO2/MWh] generator C02 emissions
+EG:     [0.35 0.47 0.53 0.38]      ! efficiency of generators
+
+W_Max: 47949.83           ! Co2 hourly emission limit
+PU:     [MW]
+CU:     [£/h]
+CperEU: [£/MWh]
+

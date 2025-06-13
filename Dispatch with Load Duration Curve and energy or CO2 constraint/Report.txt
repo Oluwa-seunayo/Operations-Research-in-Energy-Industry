@@ -52,4 +52,4 @@ end-do
 
 include 'CheckSol.txt'
 
-!fclose(F_OUTPUT)     ! uncomment to send output to file
+!fclose(F_OUTPUT)     

@@ -1,0 +1,117 @@
+\documentclass{report}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{ Report}
+\author{Your Name}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Introduction}
+
+This report summarizes the results for Dispatch with Load Duration Curve and energy or CO2 constraint. The main objective was to solve economic dispatch problems under generator capacity and CO₂ emission constraints.
+
+\chapter{Part A -- Manual Dispatch}
+
+This section involves manually solving for generator schedules under various G1 energy constraints.
+
+\section{Summary of cases}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+ & G1 Energy Limit & G1 (GWh) & G2 (GWh) & G3 (GWh) & G4 (GWh) & Market (Price) \\
+\hline
+a & None & 336 & 224 & 168 & 0 & 80, 40, 30 \\
+b &  273 &  273 & 238 & 169 & 0 & 80, 40, 40 \\
+c &  168 &  168 & 277 & 169 & 0 & 80, 40, 40 \\
+d &   63 &   63 & 353 & 169 & 0 & 80, 40, 40 \\
+\hline
+\end{tabular}
+\caption{Dispatch under G1 energy constraints}
+\end{table}
+
+\chapter{Part B -- Model with CO₂ Constraints}
+
+\section{Mathematical formulation}
+
+\[
+\min \sum_t \sum_g C_g p_{Ggt}
+\]
+with:
+\[
+\sum_g p_{Ggt} = PD_t \quad \forall t
+\]
+\[
+0 \le p_{Ggt} \le P_g^+ \quad \forall g,t
+\]
+\[
+\sum_t \sum_g z_g p_{Ggt} \le CO_2\text{ limit}
+\]
+with:
+\[
+z_g = \frac{WF_g}{E_g}
+\]
+
+\section{Model implementation (Mosel)}
+
+The implemented Mosel script efficiently solves for pGgt, shadow prices for CO₂, capacity shadow prices, and average hourly CO₂ output.
+
+\section{Summary of results}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & OCGT & CCGT & Coal & Diesel \\
+\hline
+Effficiency & +0.47 & +0.53 & +0.38 & +0.35 \\
+CO₂ per MWh & +0.39 & +0.34 & +0.83 & +0.69 \\
+shadow price & +94.13 & +119.44 & +0 & +0 \\
+average CO₂ (t/hr) & +1,507.5 & +5,200 & +19,000 & +992.5 \\
+\hline
+\end{tabular}
+\caption{Summary of generator performance under CO₂ constraint}
+\end{table}
+
+\section{CO₂ Constraints (Analysis)}    
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+CO₂ Limit &  Shadow price \\
+\hline
+10,205.5 & +496.27 \\
+12,465.5 & +  33.21 \\
+17,418.8 & +  10.09 \\
+above & +   0 \\
+\hline
+\end{tabular}
+\caption{Shadow prices for CO₂ constraint}
+\end{table}
+
+\section{Summary (Graphical representation and Comments)}    
+
+- The average hourly cost drops as CO₂ constraint is relaxed.  
+- The average power output by generator increases alongside this relaxation.  
+- The shadow price drops to zero when the constraint is non-binding.  
+
+\chapter{Conclusion}
+
+This project demonstrates:
+\begin{itemize}
+\item The economic algorithm for power dispatch under constraints.
+\item The shadow price’s role in reflecting constraint tightness.
+\item The operational policy’s adjustment in response to policy signals.
+\end{itemize}
+
+\end{document}
